@@ -15,6 +15,7 @@ import java.lang.reflect.Type
 class ProtobufConverter : NetConverter {
 
     override fun <R> onConvert(succeed: Type, response: Response): R? {
+        return NetConverter.onConvert<R>(succeed, response)
         try {
             return NetConverter.onConvert<R>(succeed, response)
         } catch (e: ConvertException) {

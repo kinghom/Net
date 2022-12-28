@@ -16,12 +16,11 @@
 
 package com.drake.net.sample.ui.fragment.converter
 
-import com.drake.net.Get
+import android.util.Log
+import com.drake.net.Post
 import com.drake.net.sample.R
-import com.drake.net.sample.constants.Api
-import com.drake.net.sample.converter.SerializationConverter
+import com.drake.net.sample.bean.CommonBean
 import com.drake.net.sample.databinding.FragmentCustomConvertBinding
-import com.drake.net.sample.model.HomeBannerModel
 import com.drake.net.utils.scopeNetLife
 
 class SerializationConvertFragment :
@@ -38,12 +37,22 @@ class SerializationConvertFragment :
         """.trimIndent()
 
         scopeNetLife {
-            val data = Get<List<HomeBannerModel>>(Api.BANNER) {
+            /*val data = Get<List<HomeBannerModel>>(Api.BANNER) {
                 // 该转换器直接解析JSON中的data字段, 而非返回的整个JSON字符串
                 converter = SerializationConverter() // 单例转换器, 此时会忽略全局转换器
             }.await()
 
-            binding.tvFragment.text = data[0].desc
+            binding.tvFragment.text = data[0].desc*/
+            val data = Post<CommonBean>("http://10.10.2.224:8002/api/login/GetJwtToken") {
+                json(
+                    "username" to "M702305",
+                    "password" to "5120569",
+                    "channel" to 1
+                )
+            }.await()
+            Log.e("kinghom","data:"+data.toString())
+        }.catch {
+            Log.e("kinghom","error:"+it.toString())
         }
     }
 

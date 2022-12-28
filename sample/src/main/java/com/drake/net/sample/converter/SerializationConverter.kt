@@ -2,6 +2,7 @@
 
 package com.drake.net.sample.converter
 
+import android.util.Log
 import com.drake.net.NetConfig
 import com.drake.net.convert.NetConverter
 import com.drake.net.exception.ConvertException
@@ -19,7 +20,7 @@ import kotlin.reflect.KType
 
 class SerializationConverter(
     val success: String = "0",
-    val code: String = "errorCode",
+    val code: String = "code",
     val message: String = "errorMsg",
 ) : NetConverter {
 
@@ -38,19 +39,25 @@ class SerializationConverter(
             when {
                 code in 200..299 -> { // 请求成功
                     val bodyString = response.body?.string() ?: return null
+
+                    var testjson ="{\"code\":0,\"msg\":\"数据更新成功\",\"data\":null,\"otherData\":null,\"count\":0}"
+
                     val kType = response.request.kType
                         ?: throw ConvertException(response, "Request does not contain KType")
                     return try {
-                        val json = JSONObject(bodyString) // 获取JSON中后端定义的错误码和错误信息
+
+                        val json = JSONObject(testjson) // 获取JSON中后端定义的错误码和错误信息
                         val srvCode = json.getString(this.code)
                         if (srvCode == success) { // 对比后端自定义错误码
+                            Log.e("kinghom","进来了1")
                             json.getString("data").parseBody<R>(kType)
                         } else { // 错误码匹配失败, 开始写入错误异常
                             val errorMessage = json.optString(message, NetConfig.app.getString(com.drake.net.R.string.no_error_message))
                             throw ResponseException(response, errorMessage, tag = srvCode) // 将业务错误码作为tag传递
                         }
                     } catch (e: JSONException) { // 固定格式JSON分析失败直接解析JSON
-                        bodyString.parseBody<R>(kType)
+                        Log.e("kinghom","进来了2")
+                        testjson.parseBody<R>(kType)
                     }
                 }
                 code in 400..499 -> throw RequestParamsException(response, code.toString()) // 请求参数错误
